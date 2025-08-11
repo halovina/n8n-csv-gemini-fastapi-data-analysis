@@ -1,0 +1,158 @@
+{
+  "name": "example-data-analisys-1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ac12b28a-638f-473a-b673-1108aaca56ea",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c13328e8-cf46-4d79-abd1-d9fffb7af9e4",
+      "name": "Webhook",
+      "webhookId": "ac12b28a-638f-473a-b673-1108aaca56ea"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert data analyst. Based on the following sales data in JSON format, provide an in-depth analysis.\n\nData: {{ JSON.stringify($('Extract from File').all()) }}\n\nYour Task:\n1. Provide a general summary of the sales trend in one paragraph.\n2. Identify the best-selling product.\n3. Provide one concrete marketing action recommendation based on the data.\n\nPresent your answer ONLY in valid JSON format with the following structure:\n{\n\"summary\": \"...\",\n\"best_selling_product\": \"...\",\n\"marketing_recommendation\": \"...\"\n}",
+        "options": {
+          "maxIterations": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "16c56c57-2c12-473a-9e8e-f113d8b1eda3",
+      "name": "AI Agent",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        520,
+        224
+      ],
+      "id": "59fcf449-b377-437d-8077-44d745774875",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Box7qfTLhAI0ZVUq",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "data0",
+        "options": {
+          "readAsString": false
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "3d2c16df-0433-42e6-bf7b-059c94e83dbf",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.8.101:8000/api/v1/savepromptdata",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "promptResponse",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "4e7bb6f1-18b6-4a7e-b97c-6b7c5061e7c9",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "df6790e8-f3e0-4980-9428-27f8a9827ab1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "19031d43327062fec298115c365488ef950942d111172995eb73ba8313e50041"
+  },
+  "id": "gAJ4fpDk5gknU8Mk",
+  "tags": []
+}
